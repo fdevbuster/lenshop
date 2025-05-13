@@ -1,5 +1,8 @@
 "use client"
 
+// This component is no longer used directly in the map view
+// It's kept for reference or potential future use with custom marker implementations
+
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -19,15 +22,10 @@ interface PlaceMarkerProps {
 
 export default function PlaceMarker({ place, onClick }: PlaceMarkerProps) {
   const [showPreview, setShowPreview] = useState(false)
-
-  // Posiciones aleatorias para la demostración
-  const left = `${Math.floor(Math.random() * 80) + 10}%`
-  const top = `${Math.floor(Math.random() * 70) + 15}%`
-
+  
   return (
     <div
-      className="absolute cursor-pointer"
-      style={{ left, top }}
+      className="cursor-pointer"
       onClick={onClick}
       onMouseEnter={() => setShowPreview(true)}
       onMouseLeave={() => setShowPreview(false)}
@@ -48,11 +46,9 @@ export default function PlaceMarker({ place, onClick }: PlaceMarkerProps) {
             <div className="text-sm font-bold">{place.name}</div>
             <div className="text-xs text-gray-500 mb-1">{place.lensHandle}</div>
             <div className="flex gap-1">
-              <Badge variant="outline" className="text-xs">
-                {place.category}
-              </Badge>
+              <Badge variant="outline">{place.category}</Badge>
               {place.hasRewards && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                   Recompensas
                 </Badge>
               )}

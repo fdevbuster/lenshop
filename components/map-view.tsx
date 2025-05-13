@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Compass, Locate } from "lucide-react"
-import PlaceMarker from "./place-marker"
+import dynamic from "next/dynamic"
 
 // Tipos para los lugares
 interface Place {
@@ -17,14 +17,29 @@ interface Place {
   hasRewards: boolean
 }
 
-export default function MapView() {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [places, setPlaces] = useState<Place[]>([])
-  const [mapLoaded, setMapLoaded] = useState(false)
+// Create a client-side only Map component
+const ClientSideMap = dynamic(
+  () => import('./map-client-component'),
+  { ssr: false }
+)
 
-  // Simular lugares cercanos
+
+
+export default function MapView() {
+  const router = useRouter();
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([41.3851, 2.1734]); // Barcelona by default
+
+  // Set map as loaded when on client side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setMapLoaded(true);
+    }
+  }, []);
+
+  // Load mock places
   useEffect(() => {
     // En una implementación real, estos datos vendrían de una API
     const mockPlaces: Place[] = [
@@ -55,75 +70,56 @@ export default function MapView() {
         category: "coworking",
         hasRewards: true,
       },
-    ]
+    ];
 
-    setPlaces(mockPlaces)
-  }, [])
+    setPlaces(mockPlaces);
+  }, []);
 
-  // Simular carga del mapa
+  // Get user location on component mount
   useEffect(() => {
-    // En una implementación real, aquí cargaríamos la API de mapas
-    setTimeout(() => {
-      setMapLoaded(true)
-      // Simular obtener la ubicación del usuario
-      setUserLocation({ lat: 41.3851, lng: 2.1734 })
-    }, 1000)
-  }, [])
+    if (typeof window !== "undefined") {
+      handleLocateMe();
+    }
+  }, []);
 
   const handleMarkerClick = (placeId: string) => {
-    router.push(`/place/${placeId}`)
-  }
+    router.push(`/place/${placeId}`);
+  };
 
   const handleLocateMe = () => {
-    if (navigator.geolocation) {
+    if (typeof window !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          })
+          const newLocation: [number, number] = [position.coords.latitude, position.coords.longitude];
+          setUserLocation(newLocation);
+          setMapCenter(newLocation);
         },
         (error) => {
-          console.error("Error getting location:", error)
-        },
-      )
+          console.error("Error getting location:", error);
+        }
+      );
     }
+  };
+
+  if (!mapLoaded) {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="h-full w-full bg-gray-100 dark:bg-gray-800 relative">
-      {/* Mapa simulado */}
-      <div ref={mapRef} className="h-full w-full bg-[url('/city-map-streets.png')] bg-cover bg-center">
-        {mapLoaded ? (
-          <>
-            {/* Marcadores de lugares */}
-            {places.map((place) => (
-              <PlaceMarker key={place.id} place={place} onClick={() => handleMarkerClick(place.id)} />
-            ))}
-
-            {/* Marcador de ubicación del usuario */}
-            {userLocation && (
-              <div
-                className="absolute w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                <div className="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-          </div>
-        )}
-      </div>
+    <div className="h-full w-full bg-gray-100 dark:bg-gray-800 relative z-0">
+      <ClientSideMap
+        places={places}
+        userLocation={userLocation}
+        mapCenter={mapCenter}
+        onMarkerClick={handleMarkerClick}
+      />
 
       {/* Controles del mapa */}
-      <div className="absolute bottom-24 right-4 flex flex-col gap-2">
+      <div className="absolute bottom-24 right-4 flex flex-col gap-2 z-[1000]">
         <Button variant="secondary" size="icon" className="rounded-full shadow-lg" onClick={handleLocateMe}>
           <Locate className="h-5 w-5" />
         </Button>

@@ -1,0 +1,60 @@
+/* Custom styles for Leaflet map */
+
+/* Hide default Leaflet attribution */
+.leaflet-control-attribution {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* Custom marker styles */
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+.user-location-marker {
+  background: transparent;
+  border: none;
+}
+
+/* Popup styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+  line-height: 1.4;
+}
+
+/* Make sure the map container takes full height */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Fix z-index issues with map layers */
+.leaflet-map-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 3 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 4 !important;
+}
+
+.leaflet-control {
+  z-index: 5 !important;
+}

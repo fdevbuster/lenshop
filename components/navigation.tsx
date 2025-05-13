@@ -20,7 +20,7 @@ export default function Navigation() {
   const navItems = [
     { href: "/", label: "Mapa", icon: Map },
     { href: "/feed", label: "Feed", icon: MessageSquare },
-    { href: "/explore", label: "Explorar", icon: Compass },
+    { href: "/explorar", label: "Explorar", icon: Compass },
     { href: "/missions", label: "Misiones", icon: Trophy },
     { href: "/profile", label: "Perfil", icon: User },
   ]
