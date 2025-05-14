@@ -95,7 +95,7 @@ export default function MapView() {
           setMapCenter(newLocation);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.warn("Error getting location:", error);
         }
       );
     }

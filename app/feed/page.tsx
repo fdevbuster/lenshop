@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import PostCard from "@/components/post-card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlusCircle } from "lucide-react"
+import PostButton from "@/components/post-button"
 
 // En una implementación real, estos datos vendrían de una API
 const getMockFeed = () => {
@@ -82,9 +83,9 @@ export default function FeedPage() {
         </TabsList>
 
         <TabsContent value="following" className="px-4 mt-4">
-          {feed.map((post) => (
+          {/* {feed.map((post) => (
             <PostCard key={post.id} post={post} />
-          ))}
+          ))} */}
         </TabsContent>
 
         <TabsContent value="trending" className="px-4 mt-4">
@@ -96,12 +97,7 @@ export default function FeedPage() {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-24 right-4">
-        <Button
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-        >
-          <PlusCircle className="h-6 w-6" />
-        </Button>
+        <PostButton />
       </div>
     </div>
   )

@@ -1,3 +1,4 @@
+
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
@@ -5,6 +6,10 @@ import "./globals.css"
 import "../styles/leaflet-custom.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navigation from "@/components/navigation"
+import { ThirdwebProvider, WalletProvider } from "thirdweb/react"
+import { IPFS } from "@/lib/ipfs"
+import { LensProvider } from "@lens-protocol/react"
+import { client } from "@/lib/lens/client"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,11 +27,23 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex flex-col min-h-screen">
-            <main className="flex-1">{children}</main>
-            <Navigation />
-          </div>
+        <ThemeProvider attribute="class">
+        <WalletProvider id="io.metamask">
+          
+            <IPFS>
+            {/* <LensProvider client={client}> */}
+            <div className="flex flex-col min-h-screen">
+              <main className="flex-1">{children}</main>
+              <Navigation />
+            </div>
+            
+            {/* </LensProvider> */}
+              
+            </IPFS>
+          
+          </WalletProvider>
+         
+          
         </ThemeProvider>
       </body>
     </html>
