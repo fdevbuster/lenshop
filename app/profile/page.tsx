@@ -7,7 +7,7 @@ import { Wallet, Trophy, Clock, MessageSquare, Settings, ExternalLink } from "lu
 
 // Mock data for user profile
 const userProfile = {
-  name: "Usuario Web3",
+  name: "Usuario Weeb3",
   lensHandle: "usuario.lens",
   walletAddress: "0x1a2...3b4c",
   bio: "Explorador de lugares Web3 en Barcelona",
