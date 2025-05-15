@@ -3,34 +3,102 @@
 import { client } from "./client";
 import { signMessageWith } from "@lens-protocol/client/viem";
 import { signer } from "./signer";
-import { Ok } from "@lens-protocol/react";
+import { mainnet, Ok, testnet } from "@lens-protocol/react";
 import { ok } from "assert";
+import { createAccount, MainUserData } from "./create-account";
+import { createWalletClient, custom, http, WalletClient } from 'viem';
+import { MetadataAttributeType } from "@lens-protocol/metadata";
+import { polygon, lensTestnet } from "viem/chains";
+import { useAccount } from "wagmi";
+import { APP_ID } from "@/config/lens";
+import { AnyClient, evmAddress, never, SessionClient } from "@lens-protocol/client";
+import { fetchAccount } from "@lens-protocol/client/actions";
+// const LENS_CHAIN_ID = 137; // Polygon Mainnet (Lens utiliza Polygon)
+// const LENS_RPC_URL = { http: ['https://polygon-rpc.com'] }; // RPC público de Polygon
+export const getAccount = async (acc:any, sessionClient:any) => {
 
+    if(!acc?.address){
+        return false
+    }
+    const result = await fetchAccount(client as any, {
+      //address: evmAddress(acc.address),
+      username: {
+        localName: 'jmdearmasc'
+      }
+    })/*.andThen((account) =>{
+      console.log("Account created", account);
+      return sessionClient.switchAccount({
+        account: account?.address ?? never("Account not found"),
+      })
+    });*/
+    
+    if (result.isErr()) {
+      return console.error(result.error);
+    }
+    
+    const account = result.value;
+    return account;
 
-export const login = async (account:`0x${string}`) => {
+}
+export const loginAsOwner= async (acc:any, walletClient:WalletClient) => {
+  console.log('loginAsOwner', walletClient)
+
+  if(!acc?.address){
+    return false
+  }
+  const authenticated = await client.login({
+    accountOwner: {
+      app: APP_ID,
+      account: signer.address,
+      owner: signer.address,
+      
+      //address: account,
+    },
+    signMessage: (...args)=>{
+        console.log('signing message', args)
+        return  signMessageWith(signer)(...args); 
+    },
+  });
+  
+  if (authenticated.isErr()) {
+    console.error(authenticated.error);
+    return false;
+  }
+
+  return authenticated.value;
+
+}
+export const createUserFromWallet = async (walletClient:WalletClient, account:`0x${string}`, metadata:MainUserData) => {
     const authenticated = await client.login({
         onboardingUser: {
-          app: '0xB2274E29D0685bF4979F2510c4D4f4E5E93D24AD',
-          wallet: account,
+          app: APP_ID ,
+          wallet: walletClient.account?.address,
+          //address: account,
         },
         signMessage: (...args)=>{
             console.log('signing message', args)
-            return signMessageWith(signer)(...args); 
+            return signMessageWith(walletClient)(...args); 
         },
       });
       
       if (authenticated.isErr()) {
         return console.error(authenticated.error);
       }
-      
+      //const walletClient = getWalletClient();
       // SessionClient: { ... }
       const sessionClient = authenticated.value;
       console.log('sessionClient', sessionClient);
       const authUser = sessionClient.getAuthenticatedUser()
-      if(authUser.isOk()){
-        sessionStorage.setItem('lens-session',JSON.stringify(authUser.value))
+      if(authUser.isOk() && walletClient){
+        //sessionStorage.setItem('lens-session',JSON.stringify(authUser.value))
 
+
+        await createAccount(sessionClient, walletClient, metadata).then((res)=>{
+            console.log('account created', res)
+        })
       }
+
+      
       
       //sessionStorage.setItem("lens-session", JSON.stringify(sessionClient));
       return sessionClient;

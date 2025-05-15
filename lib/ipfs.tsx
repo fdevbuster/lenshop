@@ -1,12 +1,13 @@
 "use client"
 import React, { useContext, useEffect, useMemo } from "react"
-import { useAccount } from "wagmi"
+import { useAccount, useConnect, useWalletClient } from "wagmi"
 import { PinataSDK } from "pinata";
 import { PINATA_GATEWAY, PINATA_JWT } from "@/config/pinata";
-import { ThirdwebProvider, useActiveAccount } from "thirdweb/react";
-import { isLoggedIn, login } from "./lens/login";
+import { ThirdwebProvider, useActiveAccount, useActiveWallet } from "thirdweb/react";
+import { isLoggedIn, createUserFromWallet } from "./lens/login";
 import { Context, SessionClient } from "@lens-protocol/client";
 import { createImagePost } from "./lens/create-post";
+import { useLogged, useSessionClient } from "@/components/session-provider";
 //import { ThirdwebProvider } from "thirdweb/react";
 // let jwt = process.env.PINATA_JWT
 // let gwy = process.env.PINATA_GATEWAY 
@@ -26,19 +27,18 @@ export const IPFSContext = React.createContext<{
 const IPFSCore = ({ children }:any)=>{
 
 
-    const [sessionClient, setSessionClient] = React.useState<any>()
+    const isLogged = useLogged()
+    
+    const acc = useAccount()
+    const sessionClient = useSessionClient()
+ 
 
-    const acc = useActiveAccount()
     const uploadFile = async (file:File, metadata?: { [k:string]:any})=>{
 
-        if(!isLoggedIn()){
-                await login(acc?.address as any).then((sessionClient)=>{
-                    console.log(sessionClient)
-                })
-        }
-        if(!acc?.address){
+        if(!isLogged || !acc.address){
             return 
         }
+
         const groups = await pinata.groups.public.list().name(acc.address)
         const group = groups.groups.find(g=>g.name === acc.address)
 
@@ -83,21 +83,8 @@ const IPFSCore = ({ children }:any)=>{
     }
     const loggedIn = isLoggedIn()
 
-    useEffect(()=>{
 
-        if(!loggedIn){
-    
-            if(acc?.address){
-                login(acc.address as any).then((sessionClient)=>{
-                    console.log('sessionClient',sessionClient)
-                    if(sessionClient){
-                        setSessionClient(sessionClient)
-                    }
-                    
-                })
-            }
-        }
-    },[loggedIn, acc?.address])
+   
     
     return /*<ThirdwebProvider>*/    <IPFSContext.Provider value={{ uploadFile, updateFile, publishImage, canUpload: !!acc?.address }}>
         { !loggedIn && 'Not logged in'}
