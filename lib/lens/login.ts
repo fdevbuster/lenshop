@@ -49,8 +49,8 @@ export const loginAsOwner= async (acc:any, walletClient:WalletClient) => {
   const authenticated = await client.login({
     accountOwner: {
       app: APP_ID,
-      account: '0x763Aa9096cf3b225D11434B7384cC97C32041090',
-      owner: '0x763aa9096cf3b225d11434b7384cc97c32041090',
+      account: acc.address,
+      owner: acc.address,
       
       //address: account,
     },
