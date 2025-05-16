@@ -4,7 +4,7 @@ import { useAccount, useConnect, useWalletClient } from "wagmi"
 import { PinataSDK } from "pinata";
 import { PINATA_GATEWAY, PINATA_JWT } from "@/config/pinata";
 import { ThirdwebProvider, useActiveAccount, useActiveWallet } from "thirdweb/react";
-import { isLoggedIn, createUserFromWallet } from "./lens/login";
+import { createUserFromWallet } from "./lens/login";
 import { Context, SessionClient } from "@lens-protocol/client";
 import { createImagePost } from "./lens/create-post";
 import { useLogged, useSessionClient } from "@/components/session-provider";
@@ -31,6 +31,7 @@ const IPFSCore = ({ children }:any)=>{
     
     const acc = useAccount()
     const sessionClient = useSessionClient()
+    const wc =  useWalletClient()
  
 
     const uploadFile = async (file:File, metadata?: { [k:string]:any})=>{
@@ -76,17 +77,17 @@ const IPFSCore = ({ children }:any)=>{
     }
 
     const publishImage = async (metadata?:{ [k:string]:any})=>{
-        if(sessionClient){
-           const result = await createImagePost(sessionClient, metadata?.title, metadata?.fileName, metadata?.url, metadata?.description)
+        if(sessionClient && wc.data){
+           const result = await createImagePost(sessionClient, wc.data, metadata?.title, metadata?.fileName, metadata?.url, metadata?.description)
            console.log('post-result',result)
         }
     }
-    const loggedIn = isLoggedIn()
+    const loggedIn = useLogged()
 
 
    
     
-    return /*<ThirdwebProvider>*/    <IPFSContext.Provider value={{ uploadFile, updateFile, publishImage, canUpload: !!acc?.address }}>
+    return /*<ThirdwebProvider>*/    <IPFSContext.Provider value={{ uploadFile, updateFile, publishImage, canUpload: loggedIn }}>
         { !loggedIn && 'Not logged in'}
         {children}
     </IPFSContext.Provider>

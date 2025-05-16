@@ -1,1 +1,1 @@
-export const APP_ID:`0x${string}`='0xB2274E29D0685bF4979F2510c4D4f4E5E93D24AD'
+export const APP_ID:`0x${string}`='0xe50D4dD31FC4b4C63C028A482Cbc920D1cF20b97'

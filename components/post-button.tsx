@@ -13,21 +13,10 @@ export default function PostButton() {
     const acc = useActiveAccount()
     const { connect } = useConnect()
 
+   
+
     const handlePostButton = ()=>{
-        console.log('Account ', acc)
-        if(acc?.address){
-            setIsOpen(true)   
-        }else{
-            connect(async ()=>{
-                const wallet = createWallet("io.metamask");
-          // connect wallet
-                await wallet.connect({
-                    client: twclient,
-                });
-                // return the wallet
-                return wallet;
-            })
-        }
+        setIsOpen(true)   
     }
   return (
     <>

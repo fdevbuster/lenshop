@@ -11,18 +11,7 @@ export const SessionContext = React.createContext<{ sessionClient:SessionClient<
 export default function SessionProvider({ children }: { children: React.ReactNode }) {
 
     const [sessionClient, setSessionClient] = React.useState<SessionClient>()
-    const isLogged = useMemo(()=>{
-
-        console.log('isLogged', sessionClient)
-        if(sessionClient){
-            
-            return sessionClient.isSessionClient() && sessionClient.getAuthenticatedUser().isOk()
-        }else{
-            return false
-        }
-     
-        
-    }, [sessionClient])
+    const isLogged = !!(sessionClient && sessionClient.isSessionClient() && sessionClient.getAuthenticatedUser().isOk())
   
     return <SessionContext.Provider value={{ sessionClient, isLogged, setSessionClient }}>
         <div className="session-buttons">

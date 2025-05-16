@@ -6,8 +6,10 @@ import {
 import { storeClient, acl } from "./store-client";
 import { SessionClient, uri } from "@lens-protocol/client";
 import { post } from "@lens-protocol/client/actions";
+import { WalletClient } from "viem";
+import { handleOperationWith } from "@lens-protocol/client/viem";
 
-export const createImagePost = async (sessionClient:SessionClient, title:string, fileName:string, url:string, description:string) => {
+export const createImagePost = async (sessionClient:SessionClient, walletClient:WalletClient, title:string, fileName:string, url:string, description:string) => {
 
     const type = getMimeTypeFromFileName(fileName);
 
@@ -24,7 +26,8 @@ export const createImagePost = async (sessionClient:SessionClient, title:string,
      const { uri:contentUri } = await storeClient.uploadAsJson(metadata, { acl })
 
      
-     const result = await post(sessionClient, { contentUri: uri(contentUri) });
+     const result = await post(sessionClient, { contentUri: uri(contentUri) })
+     .andThen(handleOperationWith(walletClient));
      return result;
 } 
 

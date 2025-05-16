@@ -10,12 +10,14 @@ interface Author {
 
 interface Post {
   id: string
-  content: string
-  image?: string
-  timestamp: string
-  likes: number
-  comments: number
-  author: Author
+  // content: string
+  // image?: string
+  // timestamp: string
+  // likes: number
+  // comments: number
+  // author: Author
+  title: string, 
+  url:string
 }
 
 interface PostCardProps {
@@ -23,32 +25,32 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
-  const formattedDate = new Date(post.timestamp).toLocaleDateString()
+ // const formattedDate = new Date(post.timestamp).toLocaleDateString()
 
   return (
     <div className="mb-4 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
       {/* Header */}
       <div className="p-4 flex items-center gap-3">
         <div className="relative h-10 w-10 rounded-full overflow-hidden">
-          <Image src={post.author.avatar || "/placeholder.svg"} alt={post.author.name} fill className="object-cover" />
+          <Image src={post.url} alt={post.title} fill className="object-cover" />
         </div>
         <div>
-          <div className="font-medium">{post.author.name}</div>
+          <div className="font-medium">{post.title}</div>
           <div className="text-xs text-gray-500">
-            {post.author.handle} • {formattedDate}
+            {/* {post.author.handle} • {formattedDate} */}
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div className="px-4 pb-2">
-        <p className="text-sm mb-3">{post.content}</p>
+        {/* <p className="text-sm mb-3">{post.content}</p> */}
       </div>
 
       {/* Image */}
-      {post.image && (
+      {post.url && (
         <div className="relative w-full h-48">
-          <Image src={post.image || "/placeholder.svg"} alt="Post image" fill className="object-cover" />
+          <Image src={post.url} alt="Post image" fill className="object-cover" />
         </div>
       )}
 
@@ -56,11 +58,11 @@ export default function PostCard({ post }: PostCardProps) {
       <div className="px-4 py-2 flex justify-between border-t dark:border-gray-700">
         <Button variant="ghost" size="sm" className="text-gray-500 hover:text-red-500">
           <Heart className="h-4 w-4 mr-1" />
-          <span className="text-xs">{post.likes}</span>
+          {/* <span className="text-xs">{post.likes}</span> */}
         </Button>
         <Button variant="ghost" size="sm" className="text-gray-500">
           <MessageCircle className="h-4 w-4 mr-1" />
-          <span className="text-xs">{post.comments}</span>
+          {/* <span className="text-xs">{post.comments}</span> */}
         </Button>
         <Button variant="ghost" size="sm" className="text-gray-500">
           <Repeat className="h-4 w-4 mr-1" />

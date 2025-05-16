@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react'
 import { useLogged, useSession, useSessionClient } from '../session-provider'
 import { Button } from './button'
-import { useAccount, useConnect, useWalletClient } from 'wagmi'
+import { Connector, useAccount, useConnect, useWalletClient } from 'wagmi'
 import { createAccount, MainUserData } from '@/lib/lens/create-account'
 import { createAccountWithUsername } from '@lens-protocol/client/actions'
 import { createUserFromWallet, loginAsOwner } from '@/lib/lens/login'
 import { MetadataAttributeType } from '@lens-protocol/metadata'
 import { signer } from '@/lib/lens/signer'
+import { Modal } from './modal'
 
 export default function SignupButton() {
 
@@ -15,6 +16,8 @@ export default function SignupButton() {
             { key: 'account-type', type: MetadataAttributeType.STRING, value: 'business' },
         ]
     })
+      const [isModalOpen, setModalOpen] = React.useState(false);
+      const [selectedConnector, setSelectedConnector] = React.useState<Connector>();
     const [openForm, setOpenForm] = React.useState(false)
     const acc = useAccount()
     const sessionClient = useSessionClient()
@@ -26,28 +29,33 @@ export default function SignupButton() {
 
     const handleSignUpProceed = async () => {
         let address= acc.address
-        console.log(connectors)
-        //if(!address){
-            const walletResults = []
-            for(const conn of connectors.slice(1)){
-                const walletResult = await new Promise<{ connected: boolean, address:string, args:any[] }>((resolve, reject)=>{
-                    connect({ connector: conn},{ onSuccess: (data, variables)=>{
-                        resolve({ connected: true, args:[data, variables], address: data.accounts[0]})
-                    }, onError: (...args)=>reject({ connected: false, args}) })
-                }).catch(err=>console.log(err))
-                walletResults.push(walletResult)
-            }
-            console.log(walletResults)
-            // if(!walletResult.connected){
-            //     return false
-            // }
-            address = walletResults.find(wr=>wr?.connected)?.address
-        //}
+        if(!selectedConnector){
+            return 
 
-        if(!wc.data || !mainUserData || !address){
-            return false
         }
-        createUserFromWallet(wc.data,signer.address as `0x${string}`,mainUserData).then(result=>{
+        //console.log(connectors)
+        try{
+            selectedConnector.disconnect()
+        }catch{
+
+        }
+        
+        
+            const walletResult = await new Promise<{ connected: boolean, address:string, args:any[] }>((resolve, reject)=>{
+                connect({ connector: selectedConnector},{ onSuccess: (data, variables)=>{
+                    resolve({ connected: true, args:[data, variables], address: data.accounts[0]})
+                }, onError: (...args)=>reject({ connected: false, args}) })
+            }).catch(err=>console.log(err))
+            
+        address = walletResult?.address;
+
+           
+        
+        //if(!address){
+            if(!mainUserData || !address || !wc.data){
+                return false
+            }
+        createUserFromWallet(wc.data,address as `0x${string}`,mainUserData).then(result=>{
             //createUserFromWallet(wc.data,address as `0x${string}`,mainUserData).then(result=>{
             console.log('result', result)
             setSessionClient(result as any)
@@ -61,17 +69,32 @@ export default function SignupButton() {
 
     
     return <>
-        { !isLogged && <>
-            <Button onClick={()=>setOpenForm(true)}>Sign up</Button> 
-            {openForm && <div className="fixed top-0 left-0 w-full h-full bg-black/50 z-50 flex items-center justify-center">
-                <div className="bg-white p-4 rounded">
-                    <h2>Sign up</h2>
-                    <input type="text" required placeholder="Username" onChange={(e)=>setMainUserData({ ...mainUserData, userName: e.target.value })} />
+          {isModalOpen && (
+                <Modal onClose={() => setModalOpen(false)}>
+                  <h2>Choose Wallet Connector</h2>
+                  <ul>
+                    {connectors.map((connector) => (
+                      <li key={connector.id}>
+                        <Button onClick={() => setSelectedConnector(connector)}>{connector.name}</Button>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <input type="text" required placeholder="Username" onChange={(e)=>setMainUserData({ ...mainUserData, userName: e.target.value })} />
                     <input type="text" required placeholder="Name" onChange={(e)=>setMainUserData({ ...mainUserData, name: e.target.value })} />
-                    <input type="text" placeholder="Bio" onChange={(e)=>setMainUserData({ ...mainUserData, bio: e.target.value })} />
-                    <Button onClick={handleSignUpProceed}>Proceed</Button>
-                </div></div>}
-        </>}
+                <input type="text" placeholder="Bio" onChange={(e)=>setMainUserData({ ...mainUserData, bio: e.target.value })} />
+                
+    
+                  {selectedConnector && (
+                <Button onClick={handleSignUpProceed}>Confirm Login with {selectedConnector.name}</Button>
+              )}
+                  <Button onClick={() => setModalOpen(false)}>Close</Button>
+                </Modal>
+              )}
+              { !isLogged && (
+                <Button onClick={() => setModalOpen(true)}>Create account</Button>
+              )}
+            
     </>       
     
 }

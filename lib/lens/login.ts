@@ -12,19 +12,17 @@ import { polygon, lensTestnet } from "viem/chains";
 import { useAccount } from "wagmi";
 import { APP_ID } from "@/config/lens";
 import { AnyClient, evmAddress, never, SessionClient } from "@lens-protocol/client";
-import { fetchAccount } from "@lens-protocol/client/actions";
+import { fetchAccount, fetchAccountsBulk } from "@lens-protocol/client/actions";
 // const LENS_CHAIN_ID = 137; // Polygon Mainnet (Lens utiliza Polygon)
 // const LENS_RPC_URL = { http: ['https://polygon-rpc.com'] }; // RPC público de Polygon
-export const getAccount = async (acc:any, sessionClient:any) => {
+export const getAccounts = async (acc:any, sessionClient:any) => {
 
     if(!acc?.address){
         return false
     }
-    const result = await fetchAccount(client as any, {
-      //address: evmAddress(acc.address),
-      username: {
-        localName: 'jmdearmasc'
-      }
+    const result = await fetchAccountsBulk(client as any, {
+      ownedBy: [evmAddress(acc.address)],
+      
     })/*.andThen((account) =>{
       console.log("Account created", account);
       return sessionClient.switchAccount({
@@ -36,8 +34,8 @@ export const getAccount = async (acc:any, sessionClient:any) => {
       return console.error(result.error);
     }
     
-    const account = result.value;
-    return account;
+    const accounts = result.value;
+    return accounts;
 
 }
 export const loginAsOwner= async (acc:any, walletClient:WalletClient) => {
@@ -48,11 +46,9 @@ export const loginAsOwner= async (acc:any, walletClient:WalletClient) => {
   }
   const authenticated = await client.login({
     accountOwner: {
-      app: APP_ID,
-      account: acc.address,
-      owner: acc.address,
-      
-      //address: account,
+      //app: APP_ID,
+      account: '0x15790a833EBB0C3d1350909c6859C633BfCb1f30',//acc.address, //walletClient.account?.address,
+      owner: walletClient.account?.address,
     },
     signMessage: (...args)=>{
         console.log('signing message', args)
@@ -105,17 +101,6 @@ export const createUserFromWallet = async (walletClient:WalletClient, account:`0
 }
 
 
-export const isLoggedIn = () => {
-    if(typeof(sessionStorage) === "undefined"){
-        return false;
-    }
-    const sessionClient = sessionStorage.getItem("lens-session");
-    if (!sessionClient) {
-        return false;
-    }
-    const parsedSessionClient = JSON.parse(sessionClient);
-    return parsedSessionClient;
-}
 export const logout = () => {
     sessionStorage.removeItem("lens-session");
 }

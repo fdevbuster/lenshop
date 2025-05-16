@@ -30,5 +30,6 @@ export const getWalletClient = async ()=>{
 } 
 
 
-export const SERVER_API_KEY = '9cT1nC-Tk-Mhozhfd_7EexQ42sNtmRKx8P'
-export const LENS_ACCOUNT = '0x7637a830dc32243ab1838876645e5297ab2bef9738cb3dc0ac7566ee7cb618a4'
+export const SERVER_API_KEY = 'g2Ls8t-ky-sk9mcAsEHRi0hLFiGr1NT-ah'
+export const APP_SIGNER_KEY= '0xce3bf7285e3e0e3168a1482700d893cc55f13321f27035ed5be448949492db5a'
+export const APP_SIGNER_ADDRESS= '0xF019981209C1910e9c145390b1159643e32ce4b8'

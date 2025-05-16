@@ -1,4 +1,4 @@
-import { LENS_ACCOUNT } from "@/config/viem.config";
+import { APP_SIGNER_KEY } from "@/config/viem.config";
 import { privateKeyToAccount,  } from "viem/accounts";
 
-export const signer = privateKeyToAccount(LENS_ACCOUNT);
+export const signer = privateKeyToAccount(APP_SIGNER_KEY);
