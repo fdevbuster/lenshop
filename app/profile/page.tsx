@@ -11,7 +11,7 @@ import { useSession } from "@/components/session-provider"
 
 // Mock data for user profile
 const userProfile = {
-  name: "Usuario Web3",
+  name: "Usuario Weegitb3",
   lensHandle: "usuario.lens",
   walletAddress: "0x1a2...3b4c",
   bio: "Explorador de lugares Web3 en Barcelona",
