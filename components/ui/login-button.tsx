@@ -32,7 +32,10 @@ export default function LoginButton() {
   };
 
   useEffect(() => {
+    setAccounts([])
+    setSelectedAccount(undefined)
     if (isModalOpen && acc.address && wc.data) {
+
       // Wallet is connected via ConnectKit, fetch Lens profiles
       const fetchLensAccounts = async () => {
         console.log('Fetching Lens accounts for:', acc.address);
@@ -54,10 +57,11 @@ export default function LoginButton() {
       setAccounts([]);
       setSelectedAccount(undefined);
     }
-  }, [isModalOpen, acc.address, wc.data]);
+  }, [isModalOpen]);
 
   useEffect(() => {
     setSelectedAccount(undefined)
+
   },[accounts])
 
 

@@ -6,7 +6,7 @@ import "./globals.css"
 import "../styles/leaflet-custom.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navigation from "@/components/navigation"
-import { ThirdwebProvider, WalletProvider } from "thirdweb/react"
+// import { ThirdwebProvider, WalletProvider } from "thirdweb/react"
 import { IPFS } from "@/lib/ipfs"
 import { LensProvider } from "@lens-protocol/react"
 import { client } from "@/lib/lens/client"
@@ -32,10 +32,11 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${inter.className} relative`}>
         <ThemeProvider attribute="class">
-          <WalletProvider id="io.metamask">
+          {/* <WalletProvider id="io.metamask"> */}
+          <WagmiWalletProvider>
             <Web3Provider>
               <TopRightConnectButton />
-              <WagmiWalletProvider>
+             
                 <SessionProvider>
 
               <IPFS>
@@ -49,9 +50,10 @@ export default function RootLayout({
                 
               </IPFS>
                 </SessionProvider>
-              </WagmiWalletProvider>
+              
             </Web3Provider>
-        </WalletProvider>
+            </WagmiWalletProvider>
+        {/* </WalletProvider> */}
          
           
         </ThemeProvider>
