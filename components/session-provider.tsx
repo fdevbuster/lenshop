@@ -20,7 +20,6 @@ export default function SessionProvider({ children }: { children: React.ReactNod
         <div className="session-buttons">
             <LoginButton />
             <LogoutButton />
-            <SignupButton />
         </div>
         {children}
 

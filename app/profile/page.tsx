@@ -8,6 +8,8 @@ import { Wallet, Trophy, Clock, MessageSquare, Settings, ExternalLink } from "lu
 import EditableItem from "@/components/editable-item"
 import { useSaveTasks } from "@/lib/lens/save-item-task"
 import { useSession } from "@/components/session-provider"
+import WalletManager from '@/components/family-wallet/family-wallet-manager'
+import WalletConnect from '@/components/wallet-connect'
 
 // Mock data for user profile
 const userProfile = {
@@ -240,21 +242,7 @@ export default function ProfilePage() {
 
         {/* Wallet Tab */}
         <TabsContent value="wallet" className="p-4">
-          <Card className="p-4">
-            <div className="flex flex-col items-center justify-center py-6">
-              <Wallet className="h-12 w-12 text-purple-500 mb-4" />
-              <h3 className="font-bold text-lg">Wallet conectada</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{userProfile.walletAddress}</p>
-              <div className="flex gap-2 mt-4">
-                <Button variant="outline" size="sm">
-                  Ver en Explorer
-                </Button>
-                <Button variant="destructive" size="sm">
-                  Desconectar
-                </Button>
-              </div>
-            </div>
-          </Card>
+          <WalletConnect />
 
           <div className="mt-6">
             <h3 className="font-bold mb-3">Tokens</h3>
@@ -273,6 +261,18 @@ export default function ProfilePage() {
               </div>
             </Card>
           </div>
+
+          {account && (
+            <div className="mt-6">
+              <h3 className="font-bold mb-3">Places Visited</h3>
+              <Card className="p-4">
+                <div className="text-center py-2">
+                  <p className="text-lg font-bold">12</p>
+                  <p className="text-xs text-gray-500">Last visit: Café Blockchain (1 day ago)</p>
+                </div>
+              </Card>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

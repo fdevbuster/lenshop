@@ -3,19 +3,10 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Map, Compass, MessageSquare, Trophy, User } from "lucide-react"
+import { Map, Compass, MessageSquare, Trophy, User } from "lucide-react";
 
 export default function Navigation() {
-  const pathname = usePathname()
-  const [isConnected, setIsConnected] = useState(false)
-
-  // Simular conexión de wallet
-  useEffect(() => {
-    // En una implementación real, verificaríamos si el usuario tiene una wallet conectada
-    setTimeout(() => {
-      setIsConnected(true)
-    }, 1000)
-  }, [])
+  const pathname = usePathname();
 
   const navItems = [
     { href: "/", label: "Mapa", icon: Map },
