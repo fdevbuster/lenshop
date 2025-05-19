@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { Heart, MessageCircle, Repeat, Share } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import CommentButton from "./comment-button"
 
 interface Author {
   name: string
@@ -60,10 +61,11 @@ export default function PostCard({ post }: PostCardProps) {
           <Heart className="h-4 w-4 mr-1" />
           {/* <span className="text-xs">{post.likes}</span> */}
         </Button>
-        <Button variant="ghost" size="sm" className="text-gray-500">
+        {/* <Button variant="ghost" size="sm" className="text-gray-500">
           <MessageCircle className="h-4 w-4 mr-1" />
-          {/* <span className="text-xs">{post.comments}</span> */}
-        </Button>
+          
+        </Button> */}
+        <CommentButton postId={post.id} />
         <Button variant="ghost" size="sm" className="text-gray-500">
           <Repeat className="h-4 w-4 mr-1" />
           <span className="text-xs">Recolectar</span>

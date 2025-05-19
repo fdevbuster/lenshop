@@ -11,6 +11,7 @@ import { client } from "@/lib/lens/client"
 import { evmAddress } from "@lens-protocol/client"
 import { APP_ID } from "@/config/lens"
 import { storeClient } from "@/lib/lens/store-client"
+import { useFeedItems } from "@/lib/ipfs"
 
 // En una implementación real, estos datos vendrían de una API
 const getMockFeed = () => {
@@ -76,40 +77,10 @@ const getMockFeed = () => {
 }
 
 export default function FeedPage() {
-  const [feed, setFeed] =useState<any[]>([])
-
-  const sessionClient = useSessionClient()
-
-  const getPosts = async ()=>{
-    const result = await fetchPosts(client as any, {
-      filter: {
-        // apps used to publish the posts
-       
-      },
-    });
-    if (result.isErr()) {
-      console.error(result.error);
-      return setFeed([])
-    }
-    console.log(result.value)
-
-    const feedItems = result.value.items.filter(p=>(p as any).metadata.mainContentFocus == 'IMAGE').map((item)=>{
-      const url = (item as any).metadata.image.item
-      const title = (item as any).metadata.content
-      return {
-        url, title, id: item.id
-      }
-    })
-    console.log(result.value, feedItems)
-    setFeed(feedItems)
-    return result
-  }
   
-  useEffect(()=>{
-   if(sessionClient && sessionClient.isSessionClient()){
-    getPosts()
-   } 
-  }, [sessionClient])
+  const feed = useFeedItems()
+  
+  console.log('feed', feed)
 
   return (
     <div className="pb-20">

@@ -5,9 +5,10 @@ import { getAccounts, loginAsOwner } from '@/lib/lens/login';
 import { Connector, useAccount, useConnect, useSignMessage, useWalletClient } from 'wagmi';
 
 import { Modal } from './modal';
+import ConnectorOption from './connector-option';
 
 export default function LoginButton() {
-  const { setSessionClient } = useSession();
+  const { setSessionClient, setAccount } = useSession();
   const isLogged = useLogged();
   const acc = useAccount();
   const wc = useWalletClient();
@@ -31,7 +32,17 @@ export default function LoginButton() {
             onSuccess: (data, variables) => {
               resolve({ connected: true, args: [data, variables], address: data.accounts[0] });
             },
-            onError: (...args) => reject({ connected: false, args }),
+            onError: (...args) => {
+
+              setAccounts([])
+              setSelectedConnector(undefined)
+              if(args[0].name == 'ConnectorAlreadyConnectedError'){
+                resolve({ connected: true, address: (wc.data?.account.address ?? ''), args })
+              }else{
+                reject({ connected: false, args }) 
+              }
+              
+            },
           }
         );
       }).catch((err) => console.log(err));
@@ -55,6 +66,7 @@ export default function LoginButton() {
       if (wc.data) {
         const session = await loginAsOwner(selectedAccount, wc.data);
         if (session) {
+          setAccount(selectedAccount);
           setSessionClient(session as any);
         }
       }
@@ -69,6 +81,10 @@ export default function LoginButton() {
     }    
   },[isModalOpen])
 
+  useEffect(() => {
+    setSelectedAccount(undefined)
+  },[accounts])
+
 
   useEffect(() => {
     if (isLogged) {
@@ -80,12 +96,14 @@ export default function LoginButton() {
   return (
     <>
       {isModalOpen && (
-        <Modal onClose={() => setModalOpen(false)}>
+        <Modal onClose={() => setModalOpen(false)} title='Login'>
           <h2>Choose Wallet Connector</h2>
-          {!selectedConnector && <ul>
+          {!selectedConnector && !accounts.length && <ul>
             {connectors.map((connector) => (
-              <li key={connector.id}>
-                <Button onClick={() => setSelectedConnector(connector)}>{connector.name}</Button>
+              <li key={connector.id} className='mb-2'>
+                <Button className='w-full h-fit flex flex-col justify-center items-start' onClick={() => setSelectedConnector(connector)}>
+                  <ConnectorOption {...connector} />
+                </Button>
               </li>
             ))}
           </ul> }

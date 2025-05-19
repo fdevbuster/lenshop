@@ -1,10 +1,12 @@
 import {
     image,
     MediaImageMimeType,
+    MetadataAttributeType,
     MetadataLicenseType,
+    textOnly,
   } from "@lens-protocol/metadata";
 import { storeClient, acl } from "./store-client";
-import { SessionClient, uri } from "@lens-protocol/client";
+import { postId, SessionClient, uri } from "@lens-protocol/client";
 import { post } from "@lens-protocol/client/actions";
 import { WalletClient } from "viem";
 import { handleOperationWith } from "@lens-protocol/client/viem";
@@ -29,6 +31,25 @@ export const createImagePost = async (sessionClient:SessionClient, walletClient:
      const result = await post(sessionClient, { contentUri: uri(contentUri) })
      .andThen(handleOperationWith(walletClient));
      return result;
+} 
+
+export const createCommentPost = async (sessionClient:SessionClient, walletClient:WalletClient, comment:string, postIdVal: string) => {
+
+  const metadata = textOnly({
+      content: comment
+
+  })
+
+   const { uri:contentUri } = await storeClient.uploadAsJson(metadata, { acl })
+
+   
+   const result = await post(sessionClient, { contentUri: uri(contentUri), commentOn: {
+      post: postId(postIdVal) 
+  } })
+   .andThen(handleOperationWith(walletClient));
+
+   console.log('Comment', result)
+   return result;
 } 
 
 // ...existing code...

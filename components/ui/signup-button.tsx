@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useLogged, useSession, useSessionClient } from '../session-provider'
 import { Button } from './button'
 import { Connector, useAccount, useConnect, useWalletClient } from 'wagmi'
@@ -8,6 +8,7 @@ import { createUserFromWallet, loginAsOwner } from '@/lib/lens/login'
 import { MetadataAttributeType } from '@lens-protocol/metadata'
 import { signer } from '@/lib/lens/signer'
 import { Modal } from './modal'
+import ConnectorOption from './connector-option'
 
 export default function SignupButton() {
 
@@ -29,13 +30,14 @@ export default function SignupButton() {
 
     const handleSignUpProceed = async () => {
         let address= acc.address
+        console.log('handleSignUpProceed', acc, selectedConnector)
         if(!selectedConnector){
             return 
 
         }
         //console.log(connectors)
         try{
-            selectedConnector.disconnect()
+            
         }catch{
 
         }
@@ -50,9 +52,12 @@ export default function SignupButton() {
         address = walletResult?.address;
 
            
-        
+        if(!address){
+          address = wc.data?.account.address
+        }
         //if(!address){
             if(!mainUserData || !address || !wc.data){
+                console.log('No address or mainUserData', mainUserData, address, wc.data, wc)
                 return false
             }
         createUserFromWallet(wc.data,address as `0x${string}`,mainUserData).then(result=>{
@@ -66,29 +71,94 @@ export default function SignupButton() {
         
     }
 
+    useEffect(() => {
+        if (isModalOpen) {
+            setSelectedConnector(undefined);  
+            setMainUserData({ name: '', bio: '', userName: '', attributes:[
+                { key: 'account-type', type: MetadataAttributeType.STRING, value: 'business' },
+            ] })
+        }
+    }, [isModalOpen])
 
     
     return <>
           {isModalOpen && (
-                <Modal onClose={() => setModalOpen(false)}>
-                  <h2>Choose Wallet Connector</h2>
+                <Modal onClose={() => setModalOpen(false)} title="Create Account">
+                  {!selectedConnector && (<>
+                    <h2>Choose Wallet Connector</h2>
                   <ul>
-                    {connectors.map((connector) => (
-                      <li key={connector.id}>
-                        <Button onClick={() => setSelectedConnector(connector)}>{connector.name}</Button>
-                      </li>
-                    ))}
-                  </ul>
+                             {connectors.map((connector) => (
+                               <li key={connector.id} className='mb-2'>
+                                 <Button className='w-full h-fit flex flex-col justify-center items-start' onClick={() => setSelectedConnector(connector)}>
+                                   <ConnectorOption {...connector} />
+                                 </Button>
+                               </li>
+                             ))}
+                           </ul> 
+                  </>)}
 
-                  <input type="text" required placeholder="Username" onChange={(e)=>setMainUserData({ ...mainUserData, userName: e.target.value })} />
-                    <input type="text" required placeholder="Name" onChange={(e)=>setMainUserData({ ...mainUserData, name: e.target.value })} />
-                <input type="text" placeholder="Bio" onChange={(e)=>setMainUserData({ ...mainUserData, bio: e.target.value })} />
-                
-    
+                  
+
+                  { selectedConnector && <form
+                    className="mt-4 flex flex-col gap-4 w-full mb-2"
+                  >
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      Username
+                      <input
+                        type="text"
+                        required
+                        disabled={!selectedConnector}
+                        placeholder="Enter your username"
+                        onChange={(e) =>
+                          setMainUserData({ ...mainUserData, userName: e.target.value })
+                        }
+                        style={{
+                          padding: '8px',
+                          borderRadius: '4px',
+                          border: '1px solid #ccc',
+                        }}
+                      />
+                    </label>
+
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      Name
+                      <input
+                        type="text"
+                        required
+                        disabled={!selectedConnector}
+                        placeholder="Enter your name"
+                        onChange={(e) =>
+                          setMainUserData({ ...mainUserData, name: e.target.value })
+                        }
+                        style={{
+                          padding: '8px',
+                          borderRadius: '4px',
+                          border: '1px solid #ccc',
+                        }}
+                      />
+                    </label>
+
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      Bio
+                      <input
+                        type="text"
+                        placeholder="Enter your bio"
+                        disabled={!selectedConnector}
+                        onChange={(e) =>
+                          setMainUserData({ ...mainUserData, bio: e.target.value })
+                        }
+                        style={{
+                          padding: '8px',
+                          borderRadius: '4px',
+                          border: '1px solid #ccc',
+                        }}
+                      />
+                    </label>
+                  </form> }
                   {selectedConnector && (
                 <Button onClick={handleSignUpProceed}>Confirm Login with {selectedConnector.name}</Button>
               )}
-                  <Button onClick={() => setModalOpen(false)}>Close</Button>
+                  {/* <Button onClick={() => setModalOpen(false)}>Close</Button> */}
                 </Modal>
               )}
               { !isLogged && (

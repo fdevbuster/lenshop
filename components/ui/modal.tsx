@@ -3,9 +3,10 @@ import React from 'react';
 interface ModalProps {
   children: React.ReactNode;
   onClose: () => void;
+  title:string
 }
 
-export function Modal({ children, onClose }: ModalProps) {
+export function Modal({ children, onClose, title }: ModalProps) {
   return (
     <div
       style={{
@@ -32,6 +33,7 @@ export function Modal({ children, onClose }: ModalProps) {
           width: '100%',
         }}
       >
+        <div>{title}</div>
         <button
           onClick={onClose}
           style={{
