@@ -1,9 +1,13 @@
+"use client"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Wallet, Trophy, Clock, MessageSquare, Settings, ExternalLink } from "lucide-react"
+import EditableItem from "@/components/editable-item"
+import { useSaveTasks } from "@/lib/lens/save-item-task"
+import { useSession } from "@/components/session-provider"
 
 // Mock data for user profile
 const userProfile = {
@@ -73,40 +77,61 @@ const userRewards = [
 ]
 
 export default function ProfilePage() {
+
+  const getSaveTask = useSaveTasks()
+  const { account } = useSession()
+
+  const metadata = account?.metadata
+
+  console.log('account meta', metadata)
   return (
     <div className="pb-20">
       {/* Header with cover image */}
-      <div className="relative h-40 w-full">
-        <Image
-          src={userProfile.coverImage}
-          alt="Cover image"
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-      </div>
+      <EditableItem type="image" pos={[10,10]} initialValue={null} saveTask={getSaveTask('coverPicture')}>
+        <div className="relative h-40 w-full">
+          <Image
+            src={metadata?.coverPicture}
+            alt="Cover image"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        </div>
+      </EditableItem>
+      
 
       {/* Profile info */}
       <div className="relative px-4 pb-4 -mt-16">
         <div className="flex justify-between">
+        <EditableItem type={'image'} initialValue={null}  saveTask={getSaveTask('picture')}>
           <div className="relative h-24 w-24 rounded-full border-4 border-white dark:border-gray-900 overflow-hidden">
+          
             <Image
-              src={userProfile.avatar}
-              alt={userProfile.name}
+              src={metadata?.picture}
+              alt={metadata?.name}
               fill
               className="object-cover"
             />
+            
+            
           </div>
-          <Button variant="outline" size="sm" className="mt-16 flex items-center gap-1">
+          </EditableItem>
+          {/* <Button variant="outline" size="sm" className="mt-16 flex items-center gap-1">
             <Settings className="h-4 w-4" />
             <span>Editar</span>
-          </Button>
+          </Button> */}
         </div>
 
         <div className="mt-2">
-          <h1 className="text-xl font-bold">{userProfile.name}</h1>
+          <EditableItem type="text" initialValue={metadata?.name}  saveTask={getSaveTask('name')}> 
+          <h1 className="text-xl font-bold">{metadata?.name}</h1>
+          </EditableItem>
+     
           <p className="text-sm text-gray-500 dark:text-gray-400">{userProfile.lensHandle}</p>
-          <p className="mt-1 text-sm">{userProfile.bio}</p>
+          <EditableItem type="text" initialValue={metadata?.bio}  saveTask={getSaveTask('userBio')}>
+            <p className="mt-1 text-sm">{metadata?.bio}</p>
+          </EditableItem>
+          
 
           <div className="mt-3 flex items-center gap-2">
             <Badge variant="outline" className="flex items-center gap-1">
@@ -161,7 +186,7 @@ export default function ProfilePage() {
                 <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                   <Image
                     src={activity.image}
-                    alt={activity.type === 'check-in' ? activity.place : activity.mission}
+                    alt={(activity.type === 'check-in' ? activity.place : activity.mission) ?? ''}
                     width={48}
                     height={48}
                     className="object-cover"

@@ -1,13 +1,14 @@
 import { MetadataAttributeType, account } from "@lens-protocol/metadata";
 import { acl, storeClient } from "./store-client";
-import { uri } from "@lens-protocol/client";
-import { createAccountWithUsername } from "@lens-protocol/client/actions";
+import { never, uri } from "@lens-protocol/client";
+import { createAccountWithUsername, fetchAccount } from "@lens-protocol/client/actions";
 import { handleOperationWith } from "@lens-protocol/client/viem";
 import { WalletClient } from "viem";
 
 export interface MainUserData{
     name: string;
     bio: string;
+    userName: string;
     attributes: {
         key: string; 
         type: MetadataAttributeType;
@@ -28,8 +29,21 @@ export const createAccount = async (sessionClient:any, walletClient:WalletClient
       console.log('account uri', uri)   
 
     const result = await createAccountWithUsername(sessionClient, {
-            username: { localName: "wagmi" },
+            username: { localName: mainData.userName },
             metadataUri: uri(accountUri),
         }).andThen(handleOperationWith(walletClient))
-        .andThen(sessionClient.waitForTransaction);;
+        .andThen(sessionClient.waitForTransaction)
+        .andThen((txHash) => fetchAccount(sessionClient, { txHash }))
+        .andThen((account) =>{
+          console.log("Account created", account);
+          return sessionClient.switchAccount({
+            account: account?.address ?? never("Account not found"),
+          })
+        }
+          
+          );
+          if (result.isErr()) {
+            return console.error(result.error);
+          }
+    return result;
 }

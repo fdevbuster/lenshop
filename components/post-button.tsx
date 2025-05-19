@@ -1,33 +1,31 @@
 "use client"
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from './ui/button'
 import { PlusCircle } from 'lucide-react'
 import { CreateMemeModal } from './create-meme-modal'
 import { ConnectButton, useActiveAccount, useConnect } from 'thirdweb/react'
 import { createWallet } from 'thirdweb/wallets'
 import { twclient } from '@/lib/bonsai'
+import { useLogged } from './session-provider'
+import { Modal } from './ui/modal'
+import LoginButton from './ui/login-button'
+import SignupButton from './ui/signup-button'
 
 export default function PostButton() {
+    const [sessionModal, setSessionModalOpen] = useState<any>(false)
     const [isOpen, setIsOpen] = React.useState(false)
 
-    const acc = useActiveAccount()
-    const { connect } = useConnect()
+
+    const loggedIn = useLogged()
 
     const handlePostButton = ()=>{
-        console.log('Account ', acc)
-        if(acc?.address){
-            setIsOpen(true)   
+        if(!loggedIn){
+            setSessionModalOpen(true)
+            return
         }else{
-            connect(async ()=>{
-                const wallet = createWallet("io.metamask");
-          // connect wallet
-                await wallet.connect({
-                    client: twclient,
-                });
-                // return the wallet
-                return wallet;
-            })
+          setIsOpen(true)   
         }
+        
     }
   return (
     <>
@@ -38,7 +36,11 @@ export default function PostButton() {
     >
         <PlusCircle className="h-6 w-6" />
     </Button> 
-    { isOpen && <CreateMemeModal onClose={function (): void {
+    { !loggedIn && sessionModal && <Modal onClose={() => setSessionModalOpen(false)} title="Connect your wallet" >
+                <LoginButton />
+                <SignupButton />
+            </Modal> }
+    { isOpen && loggedIn && <CreateMemeModal onClose={function (): void {
               setIsOpen(false)
           } } /> }
     </>

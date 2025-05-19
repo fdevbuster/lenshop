@@ -10,6 +10,9 @@ import { ThirdwebProvider, WalletProvider } from "thirdweb/react"
 import { IPFS } from "@/lib/ipfs"
 import { LensProvider } from "@lens-protocol/react"
 import { client } from "@/lib/lens/client"
+import { WagmiProvider } from "wagmi"
+import { WagmiWalletProvider } from "@/components/wallet-provider"
+import SessionProvider from "@/components/session-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,20 +31,23 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <ThemeProvider attribute="class">
-        <WalletProvider id="io.metamask">
-          
-            <IPFS>
-            {/* <LensProvider client={client}> */}
-            <div className="flex flex-col min-h-screen">
-              <main className="flex-1">{children}</main>
-              <Navigation />
-            </div>
-            
-            {/* </LensProvider> */}
+          <WalletProvider id="io.metamask">
+            <WagmiWalletProvider>
+              <SessionProvider>
+
+              <IPFS>
+              {/* <LensProvider client={client}> */}
+              <div className="flex flex-col min-h-screen">
+                <main className="flex-1">{children}</main>
+                <Navigation />
+              </div>
               
-            </IPFS>
-          
-          </WalletProvider>
+              {/* </LensProvider> */}
+                
+              </IPFS>
+            </SessionProvider>
+          </WagmiWalletProvider>
+        </WalletProvider>
          
           
         </ThemeProvider>
