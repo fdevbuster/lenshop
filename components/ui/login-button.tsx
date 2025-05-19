@@ -12,54 +12,12 @@ export default function LoginButton() {
   const isLogged = useLogged();
   const acc = useAccount();
   const wc = useWalletClient();
-  const { connect, connectors } = useConnect();
+  // const { connect, connectors } = useConnect(); // Removed as wagmi connection is assumed from ConnectKit
   const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedConnector, setSelectedConnector] = useState<Connector>();
+  // const [selectedConnector, setSelectedConnector] = useState<Connector>(); // To be removed or re-evaluated
   const [selectedAccount, setSelectedAccount] = useState<any>();
   const [accounts, setAccounts] = useState<any[]>([] as any[]);
   
-  const handleConnectorConfirm = async () => {
-    if (selectedConnector) {
-      try{
-        selectedConnector.disconnect();
-      }catch(e){
-
-      }
-      const walletResult = await new Promise<{ connected: boolean; address: string; args: any[] }>((resolve, reject) => {
-        connect(
-          { connector: selectedConnector },
-          {
-            onSuccess: (data, variables) => {
-              resolve({ connected: true, args: [data, variables], address: data.accounts[0] });
-            },
-            onError: (...args) => {
-
-              setAccounts([])
-              setSelectedConnector(undefined)
-              if(args[0].name == 'ConnectorAlreadyConnectedError'){
-                resolve({ connected: true, address: (wc.data?.account.address ?? ''), args })
-              }else{
-                reject({ connected: false, args }) 
-              }
-              
-            },
-          }
-        );
-      }).catch((err) => console.log(err));
-
-      
-      console.log('walletResult', walletResult)
-      if (walletResult?.connected && wc.data) {
-        const accounts = await getAccounts(walletResult, wc.data);
-        if(accounts && accounts.length){
-          console.log('accounts', accounts)
-          setAccounts(accounts);
-
-        }
-      }
-    }
-  }
-
 
   const handleLogin = async () => {
     
@@ -74,12 +32,29 @@ export default function LoginButton() {
   };
 
   useEffect(() => {
-    if (isModalOpen) {
-      setSelectedConnector(undefined);
-      setAccounts([])
-      setSelectedAccount(undefined)
-    }    
-  },[isModalOpen])
+    if (isModalOpen && acc.address && wc.data) {
+      // Wallet is connected via ConnectKit, fetch Lens profiles
+      const fetchLensAccounts = async () => {
+        console.log('Fetching Lens accounts for:', acc.address);
+        const lensProfiles = await getAccounts({ address: acc.address }, wc.data); // Pass address and walletClient
+        if (lensProfiles && Array.isArray(lensProfiles)) {
+          console.log('Lens profiles found:', lensProfiles);
+          setAccounts(lensProfiles);
+        } else {
+          console.log('No Lens profiles found or error fetching.');
+          setAccounts([]);
+        }
+      };
+      fetchLensAccounts();
+      setSelectedAccount(undefined); // Reset selected account when modal opens
+    } else if (isModalOpen) {
+      // Wallet not connected via wagmi/ConnectKit, or wc.data not ready
+      // Potentially show a message or rely on SignupButton for onboarding
+      console.log('Login modal opened, but wagmi account/walletClient not ready.');
+      setAccounts([]);
+      setSelectedAccount(undefined);
+    }
+  }, [isModalOpen, acc.address, wc.data]);
 
   useEffect(() => {
     setSelectedAccount(undefined)
@@ -97,23 +72,7 @@ export default function LoginButton() {
     <>
       {isModalOpen && (
         <Modal onClose={() => setModalOpen(false)} title='Login'>
-          <h2>Choose Wallet Connector</h2>
-          {!selectedConnector && !accounts.length && <ul>
-            {connectors.map((connector) => (
-              <li key={connector.id} className='mb-2'>
-                <Button className='w-full h-fit flex flex-col justify-center items-start' onClick={() => setSelectedConnector(connector)}>
-                  <ConnectorOption {...connector} />
-                </Button>
-              </li>
-            ))}
-          </ul> }
-
-          {!selectedAccount && selectedConnector && (
-        <Button onClick={handleConnectorConfirm}>Confirm Login with {selectedConnector.name}</Button>
-
-            
-          )}
-      <h2>Choose an Account</h2>
+          <h2>Choose a Lens Profile</h2>
           {!selectedAccount && <ul>
             {(accounts as any[]).map((account:any) => (
               <li key={account.address}>

@@ -18,88 +18,77 @@ export default function SignupButton() {
         ]
     })
       const [isModalOpen, setModalOpen] = React.useState(false);
-      const [selectedConnector, setSelectedConnector] = React.useState<Connector>();
-    const [openForm, setOpenForm] = React.useState(false)
+    // const [selectedConnector, setSelectedConnector] = React.useState<Connector>(); // To be removed
+    // const [openForm, setOpenForm] = React.useState(false) // Seems unused, consider removing if confirmed
     const acc = useAccount()
     const sessionClient = useSessionClient()
     const { setSessionClient } = useSession()
     const isLogged = useLogged()
-    const wacc = useAccount()
+    const wacc = useAccount() // Note: 'acc' from useAccount() is already defined above, 'wacc' might be a typo or redundant.
     const wc = useWalletClient()
-    const { connect, connectors } = useConnect()
+    // const { connect, connectors } = useConnect() // Removed as wagmi connection is assumed from ConnectKit
 
     const handleSignUpProceed = async () => {
-        let address= acc.address
-        console.log('handleSignUpProceed', acc, selectedConnector)
-        if(!selectedConnector){
-            return 
+        const userAddress = acc.address;
 
+        if (!userAddress || !wc.data) {
+            console.log('Wallet not connected or WalletClient not available.');
+            // Optionally, prompt user to connect wallet via ConnectKit button
+            alert('Please connect your wallet first using the button in the top right.');
+            return;
         }
-        //console.log(connectors)
-        try{
-            
-        }catch{
 
+        if (!mainUserData.userName || !mainUserData.name) {
+            alert('Username and Name are required to create a Lens profile.');
+            return;
         }
-        
-        
-            const walletResult = await new Promise<{ connected: boolean, address:string, args:any[] }>((resolve, reject)=>{
-                connect({ connector: selectedConnector},{ onSuccess: (data, variables)=>{
-                    resolve({ connected: true, args:[data, variables], address: data.accounts[0]})
-                }, onError: (...args)=>reject({ connected: false, args}) })
-            }).catch(err=>console.log(err))
-            
-        address = walletResult?.address;
 
-           
-        if(!address){
-          address = wc.data?.account.address
-        }
-        //if(!address){
-            if(!mainUserData || !address || !wc.data){
-                console.log('No address or mainUserData', mainUserData, address, wc.data, wc)
-                return false
+        console.log('Proceeding with signup for address:', userAddress, 'with data:', mainUserData);
+
+        try {
+            const result = await createUserFromWallet(wc.data, userAddress as `0x${string}`, mainUserData);
+            if (result && !(result instanceof Error)) { // Ensure result is not an error
+                console.log('Signup successful, session client created:', result);
+                setSessionClient(result as any);
+                setModalOpen(false); // Close signup modal on success
+            } else {
+                console.error('Signup failed or returned an error:', result);
+                alert('Failed to create Lens profile. Check console for details.');
             }
-        createUserFromWallet(wc.data,address as `0x${string}`,mainUserData).then(result=>{
-            //createUserFromWallet(wc.data,address as `0x${string}`,mainUserData).then(result=>{
-            console.log('result', result)
-            setSessionClient(result as any)
-            setOpenForm(false)
-           // loginAsOwner(acc)
-        })
-
-        
-    }
+        } catch (error) {
+            console.error('Error during createUserFromWallet:', error);
+            alert('An error occurred during signup. Check console for details.');
+        }
+    };
 
     useEffect(() => {
         if (isModalOpen) {
-            setSelectedConnector(undefined);  
-            setMainUserData({ name: '', bio: '', userName: '', attributes:[
-                { key: 'account-type', type: MetadataAttributeType.STRING, value: 'business' },
-            ] })
+            // Reset form data when modal opens
+            setMainUserData({
+                name: '', bio: '', userName: '', attributes:[
+                    { key: 'account-type', type: MetadataAttributeType.STRING, value: 'business' },
+                ]
+            });
+            // Check if wallet is connected when modal opens
+            if (!acc.address) {
+                console.log('Signup modal opened, but no wallet connected via ConnectKit.');
+                // Optionally, you could close the modal and prompt connection,
+                // or let the form be disabled until connection.
+            }
         }
-    }, [isModalOpen])
+    }, [isModalOpen, acc.address]);
 
     
     return <>
           {isModalOpen && (
-                <Modal onClose={() => setModalOpen(false)} title="Create Account">
-                  {!selectedConnector && (<>
-                    <h2>Choose Wallet Connector</h2>
-                  <ul>
-                             {connectors.map((connector) => (
-                               <li key={connector.id} className='mb-2'>
-                                 <Button className='w-full h-fit flex flex-col justify-center items-start' onClick={() => setSelectedConnector(connector)}>
-                                   <ConnectorOption {...connector} />
-                                 </Button>
-                               </li>
-                             ))}
-                           </ul> 
-                  </>)}
+                <Modal onClose={() => setModalOpen(false)} title="Create Lens Profile">
+                  {/* Wallet connector selection removed, assuming connection via ConnectKit */}
 
                   
 
-                  { selectedConnector && <form
+                  {/* Form is now always available if modal is open, relies on acc.address for enabling submission */}
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); handleSignUpProceed(); }}
                     className="mt-4 flex flex-col gap-4 w-full mb-2"
                   >
                     <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -107,7 +96,7 @@ export default function SignupButton() {
                       <input
                         type="text"
                         required
-                        disabled={!selectedConnector}
+                        disabled={!acc.address} // Disabled if no wallet connected
                         placeholder="Enter your username"
                         onChange={(e) =>
                           setMainUserData({ ...mainUserData, userName: e.target.value })
@@ -125,7 +114,7 @@ export default function SignupButton() {
                       <input
                         type="text"
                         required
-                        disabled={!selectedConnector}
+                        disabled={!acc.address} // Disabled if no wallet connected
                         placeholder="Enter your name"
                         onChange={(e) =>
                           setMainUserData({ ...mainUserData, name: e.target.value })
@@ -143,7 +132,7 @@ export default function SignupButton() {
                       <input
                         type="text"
                         placeholder="Enter your bio"
-                        disabled={!selectedConnector}
+                        disabled={!acc.address} // Disabled if no wallet connected
                         onChange={(e) =>
                           setMainUserData({ ...mainUserData, bio: e.target.value })
                         }
@@ -154,10 +143,11 @@ export default function SignupButton() {
                         }}
                       />
                     </label>
-                  </form> }
-                  {selectedConnector && (
-                <Button onClick={handleSignUpProceed}>Confirm Login with {selectedConnector.name}</Button>
-              )}
+                  </form>
+                  {/* The form now has its own submit mechanism, button below can be generic or removed if form has submit button */}
+                  <Button type="button" onClick={handleSignUpProceed} disabled={!acc.address || !mainUserData.userName || !mainUserData.name}>
+                    Create Lens Profile & Login
+                  </Button>
                   {/* <Button onClick={() => setModalOpen(false)}>Close</Button> */}
                 </Modal>
               )}

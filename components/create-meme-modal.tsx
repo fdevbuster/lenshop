@@ -14,9 +14,9 @@ import { Dropzone } from "@/components/dropable-file";
 import { useIpfs } from "@/lib/ipfs";
 import { PINATA_GATEWAY } from "@/config/pinata";
 import { StepNum, validateMeme } from "@/lib/validation/create-meme";
-import {  twclient, useRegisterContract } from "@/lib/bonsai";
+import { useCreateNftMint } from "@/lib/bonsai";
+import { useAccount, useWalletClient } from 'wagmi';
 //import { ConnectButton, useActiveAccount } from "thirdweb/react";
-//import { useAccount } from "wagmi";
 
 interface CreateMemeModalProps {
   onClose: () => void;
@@ -41,6 +41,63 @@ export function CreateMemeModal({ onClose }: CreateMemeModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast();
   const ipfs = useIpfs()
+  const { address: wagmiAccountAddress } = useAccount();
+  const { data: wagmiWalletClient } = useWalletClient();
+
+  // Moved publishToLens function before useCreateNftMint to resolve reference error
+  const publishToLens = (mintTxHash?: string) => {
+    const postDescription = mintTxHash 
+      ? `${memeData.description}\n\nMinted NFT: ${mintTxHash}`
+      : memeData.description;
+
+    ipfs.publishImage({
+      title: memeData.name,
+      fileName: file?.name || 'meme.png',
+      url: memeData.imageUrl,
+      description: postDescription,
+    }).then((res)=>{
+      console.log('Lens Post Result', res)
+      toast({
+        title: "Meme Published to Lens!", 
+        description: "Your meme has been successfully published.",
+      });
+      onClose();
+    }).catch((error)=>{
+      console.error('Error publishing meme to Lens', error)
+      toast({
+        title: "Error Publishing to Lens",   
+        description: "" + error,
+        variant: "destructive",
+      });
+    }).finally(()=>{
+      setIsPublishing(false); 
+    });
+  }
+
+  const {
+    createNft,
+    isLoading: isMintingNft,
+    error: nftMintError,
+    isSuccess: isNftMintSuccess,
+    transactionHash: nftTransactionHash,
+  } = useCreateNftMint({
+    onSuccess: (result) => {
+      toast({
+        title: "NFT Minted Successfully!",
+        description: `Transaction: ${result.transactionHash}`,
+      });
+      // Now proceed to publish to Lens
+      publishToLens(result.transactionHash); 
+    },
+    onError: (error) => {
+      toast({
+        title: "NFT Minting Failed",
+        description: error.message || "An unknown error occurred.",
+        variant: "destructive",
+      });
+      setIsPublishing(false); // Reset publishing state
+    },
+  });
 
   //const activeAccount = useActiveAccount()
 
@@ -84,46 +141,29 @@ export function CreateMemeModal({ onClose }: CreateMemeModalProps) {
 
   };
 
-  const handlePublish = () => {
-    setIsPublishing(true);
+  const handlePublish = async () => { 
+    if (!wagmiAccountAddress || !wagmiWalletClient) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Optional: Add Lens login check here if desired
 
-    ipfs.publishImage({
-      title: memeData.name,
-      fileName: file?.name || 'meme.png',
-      url: memeData.imageUrl,
+    setIsPublishing(true); // This state now means "minting and/or publishing"
+    
+    const nftToMintData = {
+      name: memeData.name,
       description: memeData.description,
-    }).then((res)=>{
-      console.log('Result', res)
-      setIsPublishing(false);
-      toast({
-        title: "Meme published!", 
-        description: "Your meme has been successfully published to Lens.",
-      });
-      onClose();
-    }).catch((error)=>{
-      console.error('Error publishing meme', error)
-      toast({
-        title: "Error publishing meme",   
-        description: "" + error,
-      });
-      setIsPublishing(false); 
-      onClose();  
-    })
-    // Simulate LensHub.post API call
-    // sendTr({ nft: { name: memeData.name, image: memeData.imageUrl, description: memeData.description  }}).then(res=>{
-    //   console.warn('result',res)
-   
-      
-    //     setIsPublishing(false);
-    //     onClose();
-    // }).catch((error)=>{
-       
-    //   toast({
-    //       title: "Error posting meme",
-    //       description: "" + error,
-    //     });
-    //   onClose();
-    // })
+      image: memeData.imageUrl, // Ensure this is the final IPFS URL for the image metadata
+    };
+
+    await createNft(nftToMintData);
+    // The rest (publishing to Lens) is handled by the onSuccess callback of useCreateNftMint
+  };
+
     // setTimeout(() => {
     //   toast({
     //     title: "Meme published!",
@@ -132,7 +172,6 @@ export function CreateMemeModal({ onClose }: CreateMemeModalProps) {
     //   setIsPublishing(false);
     //   onClose();
     // }, 2000);
-  };
 
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -451,16 +490,16 @@ export function CreateMemeModal({ onClose }: CreateMemeModalProps) {
               </Button>
             
               <Button
-                disabled={!validation?.valid || isPublishing /*|| !activeAccount?.address*/} 
+                disabled={!validation?.valid || isPublishing || isMintingNft || !wagmiAccountAddress} 
                 onClick={handlePublish}
                 className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
               >
-                {isPublishing ? (
-                  <>Publishing...</>
+                {(isPublishing || isMintingNft) ? (
+                  <>Processing...</> // Generic message for minting or publishing
                 ) : (
                   <>
                     <Check className="mr-2 h-4 w-4" />
-                    Publish to Lens
+                    Mint & Publish
                   </>
                 )}
               </Button>
