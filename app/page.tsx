@@ -5,7 +5,7 @@ import { Search, Filter } from "lucide-react"
 export default function Home() {
   return (
     <div className="relative h-screen w-full">
-      {/* <MapView /> */}
+      <MapView />
 
       {/* Search and Filter Overlay */}
       <div className="absolute top-4 left-0 right-0 px-4 z-30">
