@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react'
 import { Modal } from './ui/modal'
 import { MessageCircle } from 'lucide-react'
