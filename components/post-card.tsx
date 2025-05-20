@@ -3,7 +3,8 @@ import { Heart, MessageCircle, Repeat, Share } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CommentButton from "./comment-button"
 import PostComments from "./post-comments"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import VoteUpButton from "./voteup"
 
 interface Author {
   name: string
@@ -30,7 +31,7 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false)
  // const formattedDate = new Date(post.timestamp).toLocaleDateString()
-
+  
   return (
     <div className="mb-4 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
       {/* Header */}
@@ -60,10 +61,11 @@ export default function PostCard({ post }: PostCardProps) {
 
       {/* Actions */}
       <div className="px-4 py-2 flex justify-between border-t dark:border-gray-700">
-        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-red-500">
-          <Heart className="h-4 w-4 mr-1" />
+        {/* <Button variant="ghost" size="sm" className="text-gray-500 hover:text-red-500"> */}
+          {/* <Heart className="h-4 w-4 mr-1" /> */}
           {/* <span className="text-xs">{post.likes}</span> */}
-        </Button>
+        {/* </Button> */}
+        <VoteUpButton postId={post.id} />
         {/* <Button variant="ghost" size="sm" className="text-gray-500">
           <MessageCircle className="h-4 w-4 mr-1" />
           

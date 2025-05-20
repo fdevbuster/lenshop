@@ -48,6 +48,7 @@ const IPFSCore = ({ children }:any)=>{
 
     const getPosts = async (filters:any)=>{
         const client = getClient()
+        
         const result = await fetchPosts(client as any, {
           filter: {
             // apps used to publish the posts
@@ -69,7 +70,7 @@ const IPFSCore = ({ children }:any)=>{
             url, title, id: item.id, comments: []
           }
         })
-        console.log(result.value, feedItems, filtered)
+        console.log(/*result.value, feedItems, */filtered)
         setFeedItems(feedItems)
         return result
       }

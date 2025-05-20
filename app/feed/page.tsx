@@ -72,7 +72,7 @@ export default function FeedPage() {
   
   const feed = useFeedItems()
   
-  console.log('feed', feed)
+  //console.log('feed', feed)
 
   return (
     <div className="pb-20">
