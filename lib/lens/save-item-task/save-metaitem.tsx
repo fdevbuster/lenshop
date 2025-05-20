@@ -1,10 +1,11 @@
 import { Context, evmAddress, MetadataAttributeType, SessionClient, uri } from "@lens-protocol/client";
 import { currentSession, fetchAccount, fetchAuthenticatedSessions, setAccountMetadata } from "@lens-protocol/client/actions";
 import { account } from "@lens-protocol/metadata";
-import { client } from "../client";
+
 import { storeClient } from "../store-client";
 import { handleOperationWith } from "@lens-protocol/client/viem";
 import { WalletClient } from "viem";
+import { getClient } from "../client";
 
 
 
@@ -13,6 +14,7 @@ export const saveBioTask = async (sessionClient:SessionClient<Context>, walletCl
     const result = await sessionClient.getAuthenticatedUser()
     if(result.isOk()){
         result.value.address
+        const client = getClient()
         const acc = await fetchAccount(client as any, {
             address: evmAddress(result.value.address),
           });
@@ -80,6 +82,7 @@ export const getSaveMetaItem = (metaName:string)=>{
           val = uri;
         }
         result.value.address
+        const client = getClient()
         const acc = await fetchAccount(client as any, {
             address: evmAddress(result.value.address),
           });

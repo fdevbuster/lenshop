@@ -110,7 +110,7 @@ export default function ProfilePage() {
           
             <Image
               src={metadata?.picture ?? userProfile.avatar}
-              alt={metadata?.name}
+              alt={metadata?.name ?? 'Name'}
               fill
               className="object-cover"
             />

@@ -9,11 +9,12 @@ import { Context, SessionClient } from "@lens-protocol/client";
 import { createImagePost } from "./lens/create-post";
 import { useLogged, useSessionClient } from "@/components/session-provider";
 import { fetchPosts } from "@lens-protocol/client/actions";
-import { client } from "./lens/client";
+
 import { Modal } from "@/components/ui/modal";
 import LoginButton from "@/components/ui/login-button";
 import { Sign } from "crypto";
 import SignupButton from "@/components/ui/signup-button";
+import { getClient } from "./lens/client";
 //import { ThirdwebProvider } from "thirdweb/react";
 // let jwt = process.env.PINATA_JWT
 // let gwy = process.env.PINATA_GATEWAY 
@@ -46,6 +47,7 @@ const IPFSCore = ({ children }:any)=>{
     const wc =  useWalletClient()
 
     const getPosts = async (filters:any)=>{
+        const client = getClient()
         const result = await fetchPosts(client as any, {
           filter: {
             // apps used to publish the posts

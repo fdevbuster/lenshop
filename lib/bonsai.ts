@@ -54,15 +54,15 @@ export function useCreateNftMint({ onSuccess, onError }: UseCreateNftMintProps) 
     }
 
     // Use wagmiWalletClient.chain.id for the most reliable current chain ID
-    if (wagmiWalletClient.chain?.id !== BONSAl_CHAIN_ID) {
-      const err = new Error(
-        `Incorrect network. Please connect to Bonsai Testnet (Chain ID ${BONSAl_CHAIN_ID}) to mint this NFT. You are currently on chain ID ${wagmiWalletClient.chain?.id}.`
-      );
-      console.error(err.message);
-      onError(err);
-      setIsLoading(false);
-      return;
-    }
+    // if (wagmiWalletClient.chain?.id !== BONSAl_CHAIN_ID) {
+    //   const err = new Error(
+    //     `Incorrect network. Please connect to Bonsai Testnet (Chain ID ${BONSAl_CHAIN_ID}) to mint this NFT. You are currently on chain ID ${wagmiWalletClient.chain?.id}.`
+    //   );
+    //   console.error(err.message);
+    //   onError(err);
+    //   setIsLoading(false);
+    //   return;
+    // }
 
     try {
       const thirdwebAccount: ThirdwebAccount = viemAdapter.walletClient.fromViem({
@@ -71,7 +71,7 @@ export function useCreateNftMint({ onSuccess, onError }: UseCreateNftMintProps) 
 
       const contract = getContract({
         client: twclient,
-        chain: defineChain(BONSAl_CHAIN_ID),
+        chain: defineChain(/*BONSAl_CHAIN_ID*/wagmiWalletClient.chain?.id),
         address: NFT_CONTRACT_ADDRESS,
       });
 
@@ -86,10 +86,18 @@ export function useCreateNftMint({ onSuccess, onError }: UseCreateNftMintProps) 
       const transactionResult = await sendTransaction({
         transaction,
         account: thirdwebAccount as any, // Bypass deep type path conflict
+      }).catch(err=>{
+        console.log('TX error',err)
+        return { transactionHash: null, error: err}
       });
-      console.log("NFT Mint Transaction successful:", transactionResult);
-      setTransactionHash(transactionResult.transactionHash);
-      onSuccess(transactionResult);
+      if(transactionResult.transactionHash){
+        console.log("NFT Mint Transaction successful:", transactionResult);
+        setTransactionHash(transactionResult.transactionHash);
+        onSuccess(transactionResult);
+      }else{
+        onError(transactionResult.error)
+      }
+      
     } catch (error: any) {
       console.error("NFT Mint Transaction failed:", error);
       setErrorState(error);

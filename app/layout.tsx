@@ -8,8 +8,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import Navigation from "@/components/navigation"
 // import { ThirdwebProvider, WalletProvider } from "thirdweb/react"
 import { IPFS } from "@/lib/ipfs"
-import { LensProvider } from "@lens-protocol/react"
-import { client } from "@/lib/lens/client"
 import { WagmiWalletProvider } from "@/components/wallet-provider";
 import { Web3Provider } from "@/components/Web3Provider";
 import { TopRightConnectButton } from "@/components/TopRightConnectButton";

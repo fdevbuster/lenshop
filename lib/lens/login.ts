@@ -1,6 +1,5 @@
 "use client";
 
-import { client } from "./client";
 import { signMessageWith } from "@lens-protocol/client/viem";
 import { signer } from "./signer";
 import { mainnet, Ok, testnet } from "@lens-protocol/react";
@@ -13,6 +12,7 @@ import { useAccount } from "wagmi";
 import { APP_ID } from "@/config/lens";
 import { AnyClient, evmAddress, never, SessionClient } from "@lens-protocol/client";
 import { fetchAccount, fetchAccountsBulk } from "@lens-protocol/client/actions";
+import { getClient } from "./client";
 // const LENS_CHAIN_ID = 137; // Polygon Mainnet (Lens utiliza Polygon)
 // const LENS_RPC_URL = { http: ['https://polygon-rpc.com'] }; // RPC público de Polygon
 export const getAccounts = async (acc:any, sessionClient:any) => {
@@ -20,6 +20,7 @@ export const getAccounts = async (acc:any, sessionClient:any) => {
     if(!acc?.address){
         return false
     }
+    const client = getClient()
     const result = await fetchAccountsBulk(client as any, {
       ownedBy: [evmAddress(acc.address)],
       
@@ -44,6 +45,7 @@ export const loginAsOwner= async (acc:any, walletClient:WalletClient) => {
   if(!acc?.address){
     return false
   }
+  const client = getClient()
   const authenticated = await client.login({
     accountOwner: {
       //app: APP_ID,
@@ -65,6 +67,7 @@ export const loginAsOwner= async (acc:any, walletClient:WalletClient) => {
 
 }
 export const createUserFromWallet = async (walletClient:WalletClient, account:`0x${string}`, metadata:MainUserData) => {
+    const client = getClient()
     const authenticated = await client.login({
         onboardingUser: {
           app: APP_ID ,

@@ -2,15 +2,7 @@
 import { Button } from "@/components/ui/button"
 import PostCard from "@/components/post-card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PlusCircle } from "lucide-react"
 import PostButton from "@/components/post-button"
-import { useSessionClient } from "@/components/session-provider"
-import { useEffect, useState } from "react"
-import { fetchPosts } from "@lens-protocol/client/actions"
-import { client } from "@/lib/lens/client"
-import { evmAddress } from "@lens-protocol/client"
-import { APP_ID } from "@/config/lens"
-import { storeClient } from "@/lib/lens/store-client"
 import { useFeedItems } from "@/lib/ipfs"
 
 // En una implementación real, estos datos vendrían de una API

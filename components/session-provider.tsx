@@ -1,10 +1,11 @@
 "use client"
 import { Context, SessionClient } from '@lens-protocol/client'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import LoginButton from './ui/login-button'
 import LogoutButton from './ui/logout-button'
 import SignupButton from './ui/signup-button'
-
+import { ConnectKitButton } from "connectkit";
+import { getClient } from '@/lib/lens/client'
 export const SessionContext = React.createContext<{ sessionClient:SessionClient<Context>|undefined, 
     account: any, setAccount: (account:any)=>void,
     setSessionClient: (session:SessionClient<Context>|undefined)=>void, isLogged: boolean}>({ sessionClient: undefined, isLogged: false, setSessionClient: (sessionClient) => {}, account: {}, setAccount: (account:any)=>{} })
@@ -15,6 +16,24 @@ export default function SessionProvider({ children }: { children: React.ReactNod
     const [sessionClient, setSessionClient] = React.useState<SessionClient>()
     const [account, setAccount] = React.useState<any>()
     const isLogged = !!(sessionClient && sessionClient.isSessionClient() && sessionClient.getAuthenticatedUser().isOk())
+
+
+    useEffect(()=>{
+        const load = async ()=>{
+            const client = getClient()
+            const resumed = await client.resumeSession();
+
+            if (resumed.isErr()) {
+            return console.error(resumed.error);
+            }
+
+            // SessionClient: { ... }
+            const sessionClient = resumed.value;
+            if(sessionClient.isSessionClient() && sessionClient.getAuthenticatedUser().isOk())
+                setSessionClient(sessionClient as any)
+        }
+        load()
+    },[])
   
     return <SessionContext.Provider value={{ sessionClient, isLogged, setSessionClient, account, setAccount }}>
         <div className="session-buttons">
