@@ -29,9 +29,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} relative`}>
-        <ThemeProvider attribute="class">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+
+        
           {/* <WalletProvider id="io.metamask"> */}
           <WagmiWalletProvider>
             <Web3Provider>
@@ -56,8 +58,10 @@ export default function RootLayout({
         {/* </WalletProvider> */}
          
           
-        </ThemeProvider>
-      </body>
+       
+     </ThemeProvider>
+
+     </body>
     </html>
   )
 }

@@ -92,7 +92,7 @@ export default function ProfilePage() {
       <EditableItem type="image" pos={[10,10]} initialValue={null} saveTask={getSaveTask('coverPicture')}>
         <div className="relative h-40 w-full">
           <Image
-            src={metadata?.coverPicture}
+            src={metadata?.coverPicture ?? userProfile.coverImage}
             alt="Cover image"
             fill
             className="object-cover"
@@ -109,7 +109,7 @@ export default function ProfilePage() {
           <div className="relative h-24 w-24 rounded-full border-4 border-white dark:border-gray-900 overflow-hidden">
           
             <Image
-              src={metadata?.picture}
+              src={metadata?.picture ?? userProfile.avatar}
               alt={metadata?.name}
               fill
               className="object-cover"

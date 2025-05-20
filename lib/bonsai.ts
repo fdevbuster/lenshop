@@ -79,7 +79,7 @@ export function useCreateNftMint({ onSuccess, onError }: UseCreateNftMintProps) 
       const transaction: PreparedTransaction = mintTo({
         contract,
         to: wagmiAccountAddress,
-        nft: nftData, // { name, description, image }
+        nft: nftData as any, // { name, description, image }
       });
 
       console.log(`Attempting to mint NFT for ${wagmiAccountAddress} on chain ${BONSAl_CHAIN_ID} with contract ${NFT_CONTRACT_ADDRESS}`);
