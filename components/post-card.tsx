@@ -2,6 +2,8 @@ import Image from "next/image"
 import { Heart, MessageCircle, Repeat, Share } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CommentButton from "./comment-button"
+import PostComments from "./post-comments"
+import { useState } from "react"
 
 interface Author {
   name: string
@@ -26,6 +28,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  const [showComments, setShowComments] = useState(false)
  // const formattedDate = new Date(post.timestamp).toLocaleDateString()
 
   return (
@@ -65,7 +68,10 @@ export default function PostCard({ post }: PostCardProps) {
           <MessageCircle className="h-4 w-4 mr-1" />
           
         </Button> */}
-        <CommentButton postId={post.id} />
+         <Button variant="ghost" size="sm" className="text-gray-500" onClick={()=>setShowComments(!showComments)}>
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    {/* <span className="text-xs">{post.comments}</span> */}
+                </Button>
         <Button variant="ghost" size="sm" className="text-gray-500">
           <Repeat className="h-4 w-4 mr-1" />
           <span className="text-xs">Recolectar</span>
@@ -75,6 +81,11 @@ export default function PostCard({ post }: PostCardProps) {
           <span className="text-xs">Compartir</span>
         </Button>
       </div>
+
+      {/* <Button className="w-full" onClick={()=>setShowComments(!showComments)} type='button' variant={'ghost'}><MessageCircle />Comments ...</Button> */}
+
+      { showComments && <PostComments initialComments={[]} postId={post.id} /> }
+    
     </div>
   )
 }
