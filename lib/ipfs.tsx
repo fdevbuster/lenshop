@@ -21,7 +21,10 @@ import { getClient } from "./lens/client";
 
 // console.log('PINATA', jwt, gwy)
 export interface FeedItem {
-    url: string, id: string, title: string
+    url: string, id: string, title: string,upvotes: number,
+      downvotes: number,
+      comments: number,
+      collects: number
 }
 const pinata = new PinataSDK({
         pinataJwt: PINATA_JWT,
@@ -67,7 +70,10 @@ const IPFSCore = ({ children }:any)=>{
           const url = (item as any).metadata.image.item
           const title = (item as any).metadata.content
           return {
-            url, title, id: item.id, comments: []
+            url, title, id: item.id, comments: [], upvotes: item.stats.upvotes,
+              downvotes: item.stats.downvotes,
+              comments: item.stats.comments,
+              collects: item.stats.collects
           }
         })
         console.log(/*result.value, feedItems, */filtered)

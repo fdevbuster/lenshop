@@ -1,3 +1,4 @@
+"use client"
 import Image from "next/image"
 import { Heart, MessageCircle, Repeat, Share } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -21,7 +22,12 @@ interface Post {
   // comments: number
   // author: Author
   title: string, 
-  url:string
+  url:string,
+  upvotes: number,
+  downvotes: number,
+  comments: number,
+  collects: number
+
 }
 
 interface PostCardProps {
